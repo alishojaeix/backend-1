@@ -9,7 +9,7 @@ impl AbstractMigrations for ReferenceDb {
     async fn drop_database(&self) {}
 
     /// Migrate the database
-    async fn migrate_database(&self) -> Result<(), ()> {
+    async fn migrate_database(&self, authifier: Option<&authifier::Authifier>) -> Result<(), ()> {
         // Here you would do your typical migrations if this was a real database.
         Ok(())
     }

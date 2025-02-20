@@ -8,5 +8,5 @@ pub trait AbstractMigrations: Sync + Send {
     async fn drop_database(&self);
 
     /// Migrate the database
-    async fn migrate_database(&self) -> Result<(), ()>;
+    async fn migrate_database(&self, authifier: Option<&authifier::Authifier>) -> Result<(), ()>;
 }

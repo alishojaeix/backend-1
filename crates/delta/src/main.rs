@@ -34,13 +34,14 @@ pub async fn web() -> Rocket<Build> {
 
     // Setup database
     let db = revolt_database::DatabaseInfo::Auto.connect().await.unwrap();
-    db.migrate_database().await.unwrap();
 
     // Setup Authifier event channel
     let (_, receiver) = unbounded();
 
     // Setup Authifier
     let authifier = db.clone().to_authifier().await;
+
+    db.migrate_database(Some(&authifier)).await.unwrap();
 
     // Launch a listener for Authifier events
     async_std::task::spawn(async move {

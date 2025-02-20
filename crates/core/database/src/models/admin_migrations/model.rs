@@ -15,10 +15,10 @@ mod tests {
     async fn migrate() {
         database_test!(|db| async move {
             // Initialise the database
-            db.migrate_database().await.unwrap();
+            db.migrate_database(None).await.unwrap();
 
             // Migrate the existing database
-            db.migrate_database().await.unwrap();
+            db.migrate_database(None).await.unwrap();
         });
     }
 }

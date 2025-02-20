@@ -7,8 +7,10 @@ use crate::{
     },
     AbstractChannels, AbstractServers, Channel, Invite, MongoDb, DISCRIMINATOR_SEARCH_SPACE,
 };
+use authifier::{Authifier, Migration};
 use bson::oid::ObjectId;
 use futures::StreamExt;
+use iso8601_timestamp::{typenum as t, Timestamp, UtcOffset};
 use rand::seq::SliceRandom;
 use revolt_permissions::DEFAULT_WEBHOOK_PERMISSIONS;
 use revolt_result::{Error, ErrorType};
@@ -21,9 +23,9 @@ struct MigrationInfo {
     revision: i32,
 }
 
-pub const LATEST_REVISION: i32 = 31;
+pub const LATEST_REVISION: i32 = 32;
 
-pub async fn migrate_database(db: &MongoDb) {
+pub async fn migrate_database(db: &MongoDb, authifier: Option<&Authifier>) {
     let migrations = db.col::<Document>("migrations");
     let data = migrations
         .find_one(Document::new())
@@ -34,7 +36,7 @@ pub async fn migrate_database(db: &MongoDb) {
         let info: MigrationInfo =
             from_document(doc).expect("Failed to read migration information.");
 
-        let revision = run_migrations(db, info.revision).await;
+        let revision = run_migrations(db, info.revision, authifier).await;
 
         migrations
             .update_one(
@@ -56,7 +58,7 @@ pub async fn migrate_database(db: &MongoDb) {
     }
 }
 
-pub async fn run_migrations(db: &MongoDb, revision: i32) -> i32 {
+pub async fn run_migrations(db: &MongoDb, revision: i32, authifier: Option<&Authifier>) -> i32 {
     info!("Starting database migration.");
 
     if revision <= 0 {
@@ -1125,6 +1127,19 @@ pub async fn run_migrations(db: &MongoDb, revision: i32) -> i32 {
                 }
                 Err(err) => panic!("{err:?}"),
             }
+        }
+    }
+
+    if revision <= 32 {
+        info!("Running migration [revision 32 / 10-02-2025]: Store last login time on sessions.");
+        if let Some(authifier) = authifier {
+            authifier
+                .database
+                .run_migration(Migration::M2025_02_20AddLastSeenToSession)
+                .await
+                .expect("Failed to run authifier migration");
+        } else {
+            panic!("Cannot run migration without authifier");
         }
     }
 

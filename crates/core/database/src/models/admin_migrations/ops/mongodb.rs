@@ -14,7 +14,7 @@ impl AbstractMigrations for MongoDb {
     }
 
     /// Migrate the database
-    async fn migrate_database(&self) -> Result<(), ()> {
+    async fn migrate_database(&self, authifier: Option<&authifier::Authifier>) -> Result<(), ()> {
         info!("Migrating the database.");
 
         let list = self
@@ -23,7 +23,7 @@ impl AbstractMigrations for MongoDb {
             .expect("Failed to fetch database names.");
 
         if list.iter().any(|x| x == &self.1) {
-            scripts::migrate_database(self).await;
+            scripts::migrate_database(self, authifier).await;
         } else {
             init::create_database(self).await;
         }
