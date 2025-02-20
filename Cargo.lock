@@ -443,7 +443,7 @@ dependencies = [
 
 [[package]]
 name = "authifier"
-version = "1.0.10"
+version = "1.0.11"
 dependencies = [
  "async-std",
  "async-trait",
@@ -6580,7 +6580,7 @@ dependencies = [
 
 [[package]]
 name = "rocket_authifier"
-version = "1.0.10"
+version = "1.0.11"
 dependencies = [
  "authifier",
  "iso8601-timestamp",
