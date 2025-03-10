@@ -121,7 +121,7 @@ impl AsyncConsumer for VapidOutboundConsumer {
                     match builder.build() {
                         Ok(msg) => {
                             if let Err(err) = self.client.send(msg).await {
-                                if err == WebPushError::Unauthorized {
+                                if matches!(err, WebPushError::Unauthorized(_)) {
                                     if let Err(err) = self
                                         .db
                                         .remove_push_subscription_by_session_id(&payload.session_id)
